@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru" />
+<head>
+    <meta charset="UTF-8" />
+</head>
+
+<body>
+<h2 id="-">Интеграция</h2>
+<h3 id="-crm-bitrix-24">На стороне CRM Bitrix 24</h3>
+<ol>
+    <li>В первую очередь создаем интеграцию CRM с нашим приложением. Разработчикам -&gt; Другое -&gt; Локальное приложение
+        Выбрать &quot;Серверное&quot; Указываем путь до обработчика <br />
+        <code class="lang-html">https://infoavtobaza.site/wp-content/themes/infoavtobaza.site/install/start.php</code><br />
+        <code class="lang-html">https://infoavtobaza.site/wp-content/themes/infoavtobaza.site/install/install.php</code>
+    </li>
+</ol>
+<p>Нажать кнопку &quot;сохранить&quot;. После этого в папке <code class="lang-html">https://infoavtobaza.site/wp-content/themes/infoavtobaza.site/install/</code> будет создан файл
+    <code>settings.json</code>. <br /><br />
+    Этот файл нужно поместить в директорию <em><b>public_html/wp-content/themes/infoavtobaza.site/Classes/companies/название_компании</b></em></p>
+
+<p>Также в данной директории в файле settings.php нужно указать Код приложения (client_id) и Ключ приложения (client_secret)</p>
+<h3 id="-">На стороне сайта</h3>
+<ol>
+    <li>
+        В файле <code><b>public/wp-content/themes/infoavtobaza.site/partials/select_form.tmpl.php</b></code> нужно создать новую или отредактировать существующую компанию.<br />
+        !!!Важно, в теге <code>option</code> название компании должно соответсвовать названию директории по пути
+        <code>public/wp-content/themes/infoavtobaza.site/Classes/companies</code>
+
+        <pre>
+            <code class="lang-php">&lt;option value=<span class="hljs-string">'?company=f4'</span> <span class="hljs-meta">&lt;?php</span>
+                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>($_GET[<span class="hljs-string">'company'</span>]) &amp;&amp; $_GET[<span class="hljs-string">'company'</span>] == <span class="hljs-string">'f4'</span>) {<span class="hljs-keyword">echo</span> <span class="hljs-string">'selected'</span>;} <span class="hljs-meta">?&gt;</span>&gt;
+        </code>
+        </pre>
+    </li>
+
+    <li>Редактировать интеграцию можно  Разработчикам -&gt; Интеграции</li>
+</ol>
+</body>
+</html>
+
+
+

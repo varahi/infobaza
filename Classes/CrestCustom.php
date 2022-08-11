@@ -1,5 +1,12 @@
 <?php
-require_once(__DIR__.'/settings.php');
+
+if (isset($_GET['company']) && $_GET['company']) {
+    $directory = $_GET['company'];
+} else {
+    $directory = '';
+}
+
+require_once(__DIR__.'/companies/'.$directory.'/settings.php');
 
 /**
  *  @version 1.36
@@ -16,7 +23,11 @@ require_once(__DIR__.'/settings.php');
  *      C_REST_IGNORE_SSL = true //turn off validate ssl by curl
  */
 
-class CRest
+/**
+ * Modified by Dmitry Vasilev at 02.08.2022
+ */
+
+class CrestCustom
 {
     const VERSION = '1.36';
     const BATCH_COUNT    = 50;//count batch 1 query
@@ -46,7 +57,8 @@ class CRest
                     'domain' => htmlspecialchars($_REQUEST['DOMAIN']),
                     'client_endpoint' => 'https://' . htmlspecialchars($_REQUEST['DOMAIN']) . '/rest/',
                 ],
-                true
+                true,
+                $directory
             );
         }
 
@@ -69,7 +81,7 @@ class CRest
      * @return mixed array|string|boolean curl-return or error
      *
      */
-    protected static function callCurl($arParams)
+    protected static function callCurl($arParams, $directory)
     {
         if (!function_exists('curl_init')) {
             return [
@@ -77,7 +89,7 @@ class CRest
                 'error_information' => 'need install curl lib'
             ];
         }
-        $arSettings = static::getAppSettings();
+        $arSettings = static::getAppSettings($directory);
         if ($arSettings !== false) {
             if (isset($arParams[ 'this_auth' ]) && $arParams[ 'this_auth' ] == 'Y') {
                 $url = 'https://oauth.bitrix.info/oauth/token/';
@@ -193,11 +205,12 @@ class CRest
      * Generate a request for callCurl()
      *
      * @var $method string
+     * @var $directory string
      * @var $params array method params
      * @return mixed array|string|boolean curl-return or error
      */
 
-    public static function call($method, $params = [])
+    public static function call($method, $directory, $params = [])
     {
         $arPost = [
             'method' => $method,
@@ -207,7 +220,7 @@ class CRest
             $arPost[ 'params' ] = static::changeEncoding($arPost[ 'params' ]);
         }
 
-        $result = static::callCurl($arPost);
+        $result = static::callCurl($arPost, $directory);
         return $result;
     }
 
@@ -260,7 +273,7 @@ class CRest
                     'method' => 'batch',
                     'params' => $arDataRest
                 ];
-                $arResult = static::callCurl($arPost);
+                $arResult = static::callCurl($arPost, $directory);
             }
         }
         return $arResult;
@@ -276,8 +289,14 @@ class CRest
 
     private static function GetNewAuth($arParams)
     {
+        if (isset($_GET['company']) && $_GET['company']) {
+            $directory = $_GET['company'];
+        } else {
+            $directory = '';
+        }
+
         $result = [];
-        $arSettings = static::getAppSettings();
+        $arSettings = static::getAppSettings($directory);
         if ($arSettings !== false) {
             $arParamsAuth = [
                 'this_auth' => 'Y',
@@ -289,7 +308,7 @@ class CRest
                         'refresh_token' => $arSettings[ "refresh_token" ],
                     ]
             ];
-            $newData = static::callCurl($arParamsAuth);
+            $newData = static::callCurl($arParamsAuth, $directory);
             if (isset($newData[ 'C_REST_CLIENT_ID' ])) {
                 unset($newData[ 'C_REST_CLIENT_ID' ]);
             }
@@ -299,9 +318,9 @@ class CRest
             if (isset($newData[ 'error' ])) {
                 unset($newData[ 'error' ]);
             }
-            if (static::setAppSettings($newData)) {
+            if (static::setAppSettings($newData, $directory)) {
                 $arParams[ 'this_auth' ] = 'N';
-                $result = static::callCurl($arParams);
+                $result = static::callCurl($arParams, $directory);
             }
         }
         return $result;
@@ -313,15 +332,15 @@ class CRest
      * @return boolean
      */
 
-    private static function setAppSettings($arSettings, $isInstall = false)
+    private static function setAppSettings($arSettings, $directory, $isInstall = false)
     {
         $return = false;
         if (is_array($arSettings)) {
-            $oldData = static::getAppSettings();
+            $oldData = static::getAppSettings($directory);
             if ($isInstall != true && !empty($oldData) && is_array($oldData)) {
                 $arSettings = array_merge($oldData, $arSettings);
             }
-            $return = static::setSettingData($arSettings);
+            $return = static::setSettingData($arSettings, $directory);
         }
         return $return;
     }
@@ -330,7 +349,7 @@ class CRest
      * @return mixed setting application for query
      */
 
-    private static function getAppSettings()
+    private static function getAppSettings($directory)
     {
         if (defined("C_REST_WEB_HOOK_URL") && !empty(C_REST_WEB_HOOK_URL)) {
             $arData = [
@@ -339,7 +358,7 @@ class CRest
             ];
             $isCurrData = true;
         } else {
-            $arData = static::getSettingData();
+            $arData = static::getSettingData($directory);
             $isCurrData = false;
             if (
                 !empty($arData[ 'access_token' ]) &&
@@ -361,11 +380,11 @@ class CRest
      * @return array setting for getAppSettings()
      */
 
-    protected static function getSettingData()
+    protected static function getSettingData($directory)
     {
         $return = [];
-        if (file_exists(__DIR__ . '/settings.json')) {
-            $return = static::expandData(file_get_contents(__DIR__ . '/settings.json'));
+        if (file_exists(__DIR__ . '/companies/'.$directory.'/settings.json')) {
+            $return = static::expandData(file_get_contents(__DIR__ . '/companies/'.$directory.'/settings.json'));
             if (defined("C_REST_CLIENT_ID") && !empty(C_REST_CLIENT_ID)) {
                 $return['C_REST_CLIENT_ID'] = C_REST_CLIENT_ID;
             }
@@ -448,9 +467,9 @@ class CRest
      * @return boolean is successes save data for setSettingData()
      */
 
-    protected static function setSettingData($arSettings)
+    protected static function setSettingData($arSettings, string $directory)
     {
-        return  (boolean)file_put_contents(__DIR__ . '/settings.json', static::wrapData($arSettings));
+        return  (boolean)file_put_contents(__DIR__ . '/companies/'.$directory.'/settings.json', static::wrapData($arSettings));
     }
 
     /**

@@ -1,0 +1,203 @@
+/*
+Theme Name: infoavtobaza.site
+Theme URI: 
+Author: Popov Roman
+Author URI: https://vk.com/popovfree
+Description: theme for infoavtobaza.site
+Version: 1.0
+*/
+
+/*
+    Changed by Dmitry Vasilev at 01.08.2022
+*/
+
+.page
+{
+    padding-left: 0px;
+    padding-right: 0px;
+}
+.link_down
+{
+    color:#b53a1a;
+}
+.footer{
+    background-color: #fff;
+}
+#links a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.col-st-3
+{
+    width: 30%;
+}
+.col-st-9{
+    width: 70%;
+    min-height: 500px;
+}
+.menu_p
+{
+    margin:0px;
+}
+.menu_p a {
+    color:#000;
+    font-size: 16px;
+}
+
+ol.ol_num, ol.ol_num ol {
+
+    list-style: none;
+
+    counter-reset: li;
+}
+li.menu_p:before {
+    counter-increment: li;
+    content: counters(li, ".") ". ";
+}
+.page_txt ul, ol {
+    font-size: 16px;
+    font-weight: 400;
+    color: #0c0c0c;
+}
+.link_down {
+    text-align: center;
+    display: block;
+}
+
+
+/*.raz {
+    position: fixed;
+    width: 20%;
+    height: 200px;
+    left: 30%;
+
+    margin-left: -300px;
+
+}
+@media (max-width: 992px){
+    .raz {
+        width: 20%;
+        margin-left: 0px;
+    }
+}*/
+.mobile_menu div.ddd {
+    display: block;
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background-color: #337AB7;
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    z-index: 9999999;
+    border: 4px solid #BFE2FF;
+    box-shadow: 1px 3px 5px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    box-sizing: content-box;
+}
+.mobile_menu div.ddd span {
+    display: block;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 4px;
+    background-color: #fff;
+    border-radius: 13px;
+    transition-duration: .4s;
+}
+.mobile_menu div.ddd span:nth-child(1) {
+    top: 14px;
+}
+.mobile_menu div.ddd span:nth-child(2) {
+    top: 23px;
+}
+.mobile_menu div.ddd span:nth-child(3) {
+    bottom: 14px;
+}
+.mobile_menu div.ddd.active span:nth-child(1) {
+    transform: translate(-15px, 9px) rotate(-45deg);
+}
+.mobile_menu div.ddd.active span:nth-child(2) {
+    transition-duration: 0s;
+    opacity: 0;
+}
+.mobile_menu div.ddd.active span:nth-child(3) {
+    transform: translate(-15px, -9px) rotate(45deg);
+}
+.mobile_menu nav {
+    display: block;
+    position: fixed;
+    bottom: 16px;
+    /* right: 16px;*/
+    left:0;
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    z-index: 9999990;
+    transition-duration: .4s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    display: none;
+}
+.mobile_menu nav.open {
+    background-color: rgba(255, 255, 255, 1);
+    width: 100vw;
+    height: 100vh;
+    right: 0px;
+    bottom: 0px;
+    border-radius: 0;
+    display: flex;
+}
+
+/*.mobile_menu nav ol.show {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}*/
+/*.mobile_menu ol li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    width: 100%;
+    opacity: 0;
+    animation-name: fadein;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+}
+.mobile_menu ol li:not(:last-child) {
+    margin-bottom: 22px;
+}*/
+.mobile_menu ol li a {
+    font-size: 12px;
+    font-family: 'Roboto Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    color: #000;
+}
+@keyframes fadein {
+    0% {
+        opacity: 0;
+
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@media (min-width:768px){
+    .mobile_menu {
+        display: none;
+    }
+}
+@media (max-width:768px){
+    .pft {
+        margin-left: 20px;
+    }
+}

@@ -1,11 +1,24 @@
 <?php
 
-
 /**
  *
  */
 class AbstractClass
 {
+
+    /**
+     * @var string
+     */
+    protected $ufCrmKey = '';
+
+    /**
+     * @param $ufCrmKey
+     */
+    public function __construct(
+        $ufCrmKey
+    ) {
+        $this->ufCrmKey = $ufCrmKey;
+    }
 
     /**
      * @return string
@@ -16,7 +29,11 @@ class AbstractClass
         return $rand;
     }
 
-    public function auth()
+    /**
+     * @param $directory
+     * @return array|mixed|string|string[]|void
+     */
+    public function auth($directory)
     {
         if (!session_id()) {
             session_start();
@@ -41,11 +58,12 @@ class AbstractClass
 
         if ($name!=""  && $lastname!="" && $cert!="") {
             if ($name!=""  && $lastname!="" && $cert!="") {
-                $result = crest::call(
+                $result = CrestCustom::call(
                     'crm.deal.list',
+                    $directory,
                     [
                         'filter' => [
-                            'UF_CRM_1639293355867' => $cert
+                            $this->ufCrmKey => $cert
                         ],
                         'select' => [
                             'ID',
@@ -54,33 +72,56 @@ class AbstractClass
                     ]
                 );
             }
-            if ($result['total'] !==0) {
-                $id_lead=$result['result'][0]['ID'];
 
-                $result = crest::call(
+            $id_contact="";
+            $id_lead="";
+            $phone_lead="";
+
+            if (isset($result['total']) && $result['total'] !==0) {
+                $id_lead = $result['result'][0]['ID'];
+
+                $result = CrestCustom::call(
                     'crm.deal.contact.items.get',
+                    $directory,
                     [
                         'id' => $id_lead
 
-                    ]
+                    ],
                 );
                 if (isset($result['result'][0])) {
                     $id_contact=$result['result'][0]['CONTACT_ID'];
 
-                    $result = crest::call(
+                    $result = CrestCustom::call(
                         'crm.contact.get',
+                        $directory,
                         [
                             'id' => $id_contact
 
-                        ]
+                        ],
                     );
+
+                    if (isset($result['result'])) {
+                        $phone_lead = $result['result']['PHONE'][0]['VALUE'];
+
+                        if ($name == $result['result']['NAME'] && $lastname == $result['result']['LAST_NAME']) {
+                            $_SESSION['auth']=$cert;
+                        } else {
+                            $this->redirect('knowledgebase/', 'Предоставленные данные не корректны! Свяжитесь с представителем Вашего сертификата для получения технической консультации', 403, 'Error');
+                        }
+                    } else {
+                        $this->redirect('knowledgebase/', 'Предоставленные данные не корректны! Свяжитесь с представителем Вашего сертификата для получения технической консультации', 403, 'Error');
+                    }
+                } else {
+                    $this->redirect('knowledgebase/', 'Предоставленные данные не корректны! Свяжитесь с представителем Вашего сертификата для получения технической консультации', 403, 'Error');
                 }
+            } else {
+                $this->redirect('knowledgebase/', 'Предоставленные данные не корректны! Свяжитесь с представителем Вашего сертификата для получения технической консультации', 403, 'Error');
             }
 
             $_SESSION['auth'] = $cert;
             return $result;
         } else {
-            return null;
+            $this->redirect('knowledgebase/', 'Предоставленные данные не корректны! Свяжитесь с представителем Вашего сертификата для получения технической консультации', 403, 'Error');
         }
     }
 
@@ -96,5 +137,36 @@ class AbstractClass
                 exit;
             }
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getDomain()
+    {
+        if (isset($_SERVER['HTTPS']) &&
+            ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||
+            isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+            $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+            return 'https://'.$_SERVER['HTTP_HOST'];
+        } else {
+            return 'http://'.$_SERVER['HTTP_HOST'];
+        }
+    }
+
+
+    /**
+     * @param $page
+     * @param $message
+     * @param $statusCode
+     * @return void
+     */
+    public function redirect($page, $message, $statusCode, $level)
+    {
+        session_start();
+        $_SESSION['message'] = $message;
+        $_SESSION['level'] = $level;
+        header('Location:' . $this->getDomain() .'/'. $page, $statusCode);
+        exit;
     }
 }

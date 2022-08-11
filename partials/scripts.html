@@ -1,0 +1,206 @@
+<script>
+
+    if ( document.documentElement.clientWidth < 768 ) {
+
+        jQuery('#sood').append( jQuery('.raz') );
+        jQuery("#block1").css("display","none");
+        jQuery(".open_mobs").css("display","block");
+        jQuery("#block2").css("width","100%");
+    }
+    jQuery('.mobile_menu div.ddd').on('click', () => {
+        jQuery('.mobile_menu div.ddd').toggleClass('active');
+        jQuery('.mobile_menu nav').toggleClass('open');
+        jQuery('.mobile_menu nav ul').toggleClass('show');
+    });
+    for (let a = 1; a <= jQuery(".mobile_menu ul li").length; a++){
+        jQuery(".mobile_menu ul li:nth-child("+ a +")").css("animation-delay", "."+ (a+1) +"s");
+    }
+
+    function hide_menu()
+    {
+        if ( document.documentElement.clientWidth < 768 ) {
+            jQuery('.mobile_menu div.ddd').toggleClass('active');
+            jQuery('.mobile_menu nav').toggleClass('open');
+            jQuery('.mobile_menu nav ul').toggleClass('show');
+
+        }
+    }
+    function st(i1,i2=0,i3=0)
+    {
+        jQuery('.text_block').css("display","none");
+        jQuery('.block_one').css("display","none");
+
+        jQuery('.pft').css("display","none");
+        if(i2==0)
+        {
+            jQuery('#k_'+i1).slideToggle(300);
+            jQuery('#text_'+i1).slideToggle(300);
+        }
+        else
+
+        {
+            jQuery('#k_'+i1).slideToggle(300);
+            jQuery('#k_'+i1+"_"+i2).slideToggle(300);
+
+            if(i3==0)
+            {
+                jQuery('#text_'+i1+"_"+i2).slideToggle(300);
+            }
+            else
+
+            {
+                jQuery('#text_'+i1+"_"+i2+"_"+i3).slideToggle(300);
+            }
+        }
+    }
+
+
+    function addEventToObject(object, type, callback) {
+
+        if (object == null || typeof(object) == 'undefined') return;
+
+        if (object.addEventListener) {
+
+            object.addEventListener(type, callback, false);
+
+        } else if (object.attachEvent) {
+
+            object.attachEvent("on" + type, callback);
+
+        } else {
+
+            object["on"+type] = callback;
+
+        }
+
+    };
+    // Функция определения позиции плавающего блока
+
+    function updateColumnPosition() {
+
+        // Находим последний элемент
+        console.log("vsdsdvs");
+
+        var element = jQuery('.raz:last'),
+
+            // Вычисляем его высоту
+
+            elementHeight = element.outerHeight(),
+
+            // Получаем высоту футера
+
+            footerHeight = jQuery('.footer').outerHeight(),
+
+            // Получаем высоту шапки сайта
+
+            headerHeight = jQuery('.header').outerHeight(),
+
+            // Получаем текущую высоту открытого окна
+
+            screenHeight = jQuery(window).height(),
+
+            // Получаем высоту всего документа
+
+            documentHeight = jQuery(document).height(),
+
+            // Вычисляемый столбец высоты сверху, которую нельзя занимать
+
+            topHeight = headerHeight,
+
+            // Текущее положение скрола
+
+            scrollTop = jQuery(document).scrollTop();
+
+
+
+        // Для того, чтобы ширина не сбилась (в зависимости от ваших CSS),
+
+        // то запоминаем ее
+
+        if(!element.data('isloaded')) {
+
+            element.data('isloaded', true);
+
+            element.css({ width: element.width() });
+
+        }
+
+        // Добавляем все высоты остальных блоков
+
+        element.parent().find('.raz:not(:last)').each(function () {
+
+            topHeight += jQuery(this).outerHeight();
+
+        });
+
+        // Если необходимо фиксировать блок сверху, и он не залезет на футер,
+
+        // то меняем его положение
+
+        if (scrollTop - topHeight > 20 && documentHeight - scrollTop - 40 > elementHeight + footerHeight) {
+
+            element.css({
+
+                position: 'fixed',
+
+                top: (100) + 'px'
+
+            });
+
+        }
+
+            // Если блок нужно фиксировать, но элемент залезет на футер,
+
+            // то выставляем его положение на максимально возможное удаление от начала страницы
+
+        // (т.е. прижимаем к футеру)
+
+        else if (scrollTop - topHeight > 20 && documentHeight - scrollTop - 40 < elementHeight + footerHeight) {
+
+            element.css({
+
+                position: 'fixed',
+
+                top: (documentHeight - elementHeight - footerHeight - 20) - scrollTop + 'px'
+
+            });
+
+        }
+
+            // Если скрол не превысил границу для фиксации блока,
+
+        // то возвращаем ему его значения
+
+        else if (scrollTop - topHeight < 20) {
+
+            element.css({
+
+                position: 'relative',
+
+                top: 'inherit'
+
+            });
+
+        }
+
+    };
+
+
+    jQuery(function () {
+
+        if ( document.documentElement.clientWidth > 768 ) {
+            // Добавим обработчик для скроллинга
+
+            addEventToObject(window, 'scroll', updateColumnPosition);
+
+            // Добавим обработчик для изменения размера активного окна
+
+            addEventToObject(window, 'resize', updateColumnPosition);
+
+            // Вызовем функцию определения позиции на случай, когда страница была перезагружена, т.е. скролл сдвинут
+
+            updateColumnPosition();
+        }
+
+    });
+</script>
